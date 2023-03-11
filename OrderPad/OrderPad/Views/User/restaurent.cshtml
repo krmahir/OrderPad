@@ -30,53 +30,47 @@
 <div class="container-fluid" style="border:5px solid green">
     <div class="row" style="border:5px solid blue">
         <div class="col-2" style="border:5px solid red">
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Active</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Active</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Active</a>
-                </li>
+            <ul id="divCatagory" class="nav flex-column">
+                
             </ul>
         </div>
-        <div class="col-6"style="border:5px solid violet">
-            <div class="card">
-                <img src="food-item-image.jpg" alt="Food Item Image">
-                <div class="card-info">
-                    <h2>Food Item Name</h2>
-                    <p>Description of the food item goes here.</p>
-                    <p>Price: $10.99</p>
-                    <button>Add to Cart</button>
-                </div>
-            </div>
-            <div class="card">
-                <img src="food-item-image.jpg" alt="Food Item Image">
-                <div class="card-info">
-                    <h2>Food Item Name</h2>
-                    <p>Description of the food item goes here.</p>
-                    <p>Price: $10.99</p>
-                    <button>Add to Cart</button>
-                </div>
-            </div>
-            <div class="card">
-                <img src="food-item-image.jpg" alt="Food Item Image">
-                <div class="card-info">
-                    <h2>Food Item Name</h2>
-                    <p>Description of the food item goes here.</p>
-                    <p>Price: $10.99</p>
-                    <button>Add to Cart</button>
-                </div>
-            </div>
+        <div id="divItemLists"class="col-6"style="border:5px solid violet">
         </div>
     </div>
 </div>
 
 @section Scripts{
     <script type="text/javascript" language="javascript">
+        var item = @Html.Raw(Json.Serialize(ViewBag.item));
+        var itemGroup = @Html.Raw(Json.Serialize(ViewBag.itemGroup))
+        var keys = Object.keys(itemGroup);
+
+        
+        //
+        window.onload = function () {
+            var html;
+            keys.forEach((catagory) => {
+                html += '<button class="nav-item" value="' + catagory.toString() + '"onclick="populateItem(this.value)">' + catagory + '</button>'
+            });
+            $("#divCatagory").append(html);
+        };
+
+        function populateItem(catagory){
+            $("#divItemLists").empty();
+            var items = itemGroup[catagory];
+            console.log(items);
+            var html;
+            items.forEach((item)=>{
+                html += '<div class="card"><div class="card-info"><h2>'+item.name+'</h2><p>'+item.description+'</p><p>Price: £'+item.price+'</p><button value="'+item.id+'" onclick="AddingToList(this.value)">Add to Cart</button></div></div>';
             
+            });
+            $("#divItemLists").append(html);
+        }
+
+        function AddingToList(id){
+            
+        }
+
     </script>
 }
     

@@ -8,6 +8,8 @@ namespace OrderPad.Controllers
     {
         private readonly ApplicationDbContext _db;
 
+        private Dictionary<string, List<Item>> itemGroup = new Dictionary<string, List<Item>>(); 
+
         public UserController(ApplicationDbContext db)
         {
             _db = db;
@@ -16,6 +18,16 @@ namespace OrderPad.Controllers
         {
             ViewData["User"] = user;
             List<Item> items = _db.Item.Where(x=> x.RestaurentID == user.RestaurentId).ToList();
+            var itemGroupsinitial = items.GroupBy(x => x.Catagory);
+            foreach (var lists in itemGroupsinitial) {
+                var temp = new List<Item>();
+                foreach (var item in lists) {
+                    temp.Add(item);
+                }
+                itemGroup.Add(lists.Key.ToString(), temp);
+            }
+            ViewBag.itemGroup = this.itemGroup;
+            ViewBag.item = items;
             
             return View();
         }
