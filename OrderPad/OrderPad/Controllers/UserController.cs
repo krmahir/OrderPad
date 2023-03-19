@@ -18,6 +18,10 @@ namespace OrderPad.Controllers
         {
             ViewData["User"] = user;
             List<Item> items = _db.Item.Where(x=> x.RestaurentID == user.RestaurentId).ToList();
+            var itemDictionary = new Dictionary<int, Item>();
+            foreach (var item in items) {
+                itemDictionary.Add(item.ID, item);
+            }
             var itemGroupsinitial = items.GroupBy(x => x.Catagory);
             foreach (var lists in itemGroupsinitial) {
                 var temp = new List<Item>();
@@ -27,7 +31,7 @@ namespace OrderPad.Controllers
                 itemGroup.Add(lists.Key.ToString(), temp);
             }
             ViewBag.itemGroup = this.itemGroup;
-            ViewBag.item = items;
+            ViewBag.item = itemDictionary;
             
             return View();
         }

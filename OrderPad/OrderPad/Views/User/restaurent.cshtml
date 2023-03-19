@@ -36,15 +36,19 @@
         </div>
         <div id="divItemLists"class="col-6"style="border:5px solid violet">
         </div>
+        <div id="divCartLists" class="col-auto" style="border:5px solid violet">
+        </div>
+        <div id="divForPrint"></div>
     </div>
 </div>
 
 @section Scripts{
+    <script src="print.js"></script>
     <script type="text/javascript" language="javascript">
         var item = @Html.Raw(Json.Serialize(ViewBag.item));
         var itemGroup = @Html.Raw(Json.Serialize(ViewBag.itemGroup))
         var keys = Object.keys(itemGroup);
-
+        var itemInBag = {};
         
         //
         window.onload = function () {
@@ -61,14 +65,143 @@
             console.log(items);
             var html;
             items.forEach((item)=>{
-                html += '<div class="card"><div class="card-info"><h2>'+item.name+'</h2><p>'+item.description+'</p><p>Price: £'+item.price+'</p><button value="'+item.id+'" onclick="AddingToList(this.value)">Add to Cart</button></div></div>';
+                html += '<div class="card"><div class="card-info"><h3>'+item.name+'</h3><p>'+item.description+'</p><p>Price: £'+item.price+'</p><button value="'+item.id+'" onclick="AddingToList(this.value)">Add to Cart</button></div></div>';
             
             });
             $("#divItemLists").append(html);
         }
 
         function AddingToList(id){
-            
+            let foodItem = item[id];
+            if (itemInBag[id] != undefined) {
+                itemInBag[id]["count"] +=1;
+            }
+            else{
+                let tempItem = {
+                    "name":foodItem.name,
+                    "count":1,
+                    "price":foodItem.price
+                }
+                itemInBag[id] = tempItem;
+            }
+            populatingCart();
+        }
+
+        function populatingCart(){
+            $("#divCartLists").empty();
+            var html = '<h4>Restaurant Order List</h4>'+
+                '<table id="order-table" cellspacing="0" rules="all" border="1"><thead>' +
+                '<tr>'+
+                '<th>Qty</th>'+
+                '<th>Item</th>'+
+                '<th>Price</th>'+
+                '<th></th>'+
+                '</tr>'+
+                '</thead><tbody>';
+            var total = 0;
+            for (const [key, value] of Object.entries(itemInBag)) {
+                let item = value;
+                let price = item["price"] * item["count"];
+                html += '<tr><td>' + item["count"] + ' X </td><td>' + item["name"] + '</td><td>' + Math.round(price * 100) / 100 + '</td><td><button value="' + key + '" onclick="AddingToList(this.value)">+</button> <button value="' + key + '" onclick="RemoveFromList(this.value)">X</button></td></tr>';
+                total += price;
+            }
+            html += '</tbody></table>';
+            html += '<p>------------------------</p><h4>Total: ' + Math.round(total * 100) / 100 + '</h4>'
+            html += '<button onclick="printOrderList()">Print</button>';
+            $("#divCartLists").append(html);
+        }
+
+        function RemoveFromList(id){
+            console.log(id);
+            if (itemInBag[id]!=undefined){
+                if (itemInBag[id]["count"]>1){
+                    itemInBag[id]["count"] -= 1;
+                }
+                else{
+                    delete(itemInBag[id]);
+                }
+            }
+            populatingCart();
+        }
+
+        function printAnything(){
+            //var text = itemInBag;
+            //var file = new Blob([text], { type: 'text/plain' });
+            //var reader = new FileReader();
+            //reader.onload = function (e) {
+            //    var contents = e.target.result;
+            //    window.print(contents);
+            //}
+            //reader.readAsText(file);
+            var file = new Blob([itemInBag], { type: 'text/plain' });
+            console.log(file)
+            window.print(file);
+            //// clone the table to preserve the original
+            //var clonedTable = table.cloneNode(true);
+
+            //// create a new document to hold the cloned table
+            //var newDoc = document.implementation.createHTMLDocument();
+            //newDoc.body.appendChild(clonedTable);
+
+            //// print the cloned table
+            //newDoc.defaultView.print();
+        }
+        function printOrderList() {
+            $("#divForPrint").empty();
+            var html = '<h4>Monpura Limited</h4>' +
+                '<table id="order-table" cellspacing="0" rules="all" border="1"><thead>' +
+                '<tr>' +
+                '<th>Qty</th>' +
+                '<th>Item</th>' +
+                '<th>Price</th>' + +
+                '</thead><tbody>';
+            var total = 0;
+            for (const [key, value] of Object.entries(itemInBag)) {
+                let item = value;
+                let price = item["price"] * item["count"];
+                html += '<tr><td>' + item["count"] + ' X </td><td>' + item["name"] + '</td><td>' + Math.round(price * 100) / 100 + '</td></tr>';
+                total += price;
+            }
+            html += '</tbody></table>';
+            html += '<h4>Total   :   ' + Math.round(total * 100) / 100 + '</h4>'
+
+            $("#divForPrint").append(html);
+            PrintTable();
+            //if (table) {
+            //    var clonedTable = table.cloneNode(true);
+            //    var newDoc = document.implementation.createHTMLDocument();
+            //    newDoc.body.appendChild(clonedTable);
+            //    newDoc.defaultView.print();
+            //} else {
+            //    console.error("Error: Could not find table element");
+            //}
+            //var file = new Blob([table], { type: 'text/plain' });
+            //console.log(file)
+            //newDoc.defaultView.print();
+            //window.print("mahir");
+        }
+
+        function PrintTable() {
+            var printWindow = window.open('', '', 'height=200,width=400');
+            printWindow.document.write('<html><head><title>Monpura Limited</title>');
+
+            //Print the Table CSS.
+            var table_style = document.getElementById("table_style").innerHTML;
+            printWindow.document.write('<style type = "text/css">');
+            printWindow.document.write(table_style);
+            printWindow.document.write('</style>');
+            printWindow.document.write('</head>');
+
+            //Print the DIV contents i.e. the HTML Table.
+            printWindow.document.write('<body>');
+            var divContents = document.getElementById("divForPrint").innerHTML;
+            printWindow.document.write(divContents);
+            printWindow.document.write('</body>');
+
+            printWindow.document.write('</html>');
+            printWindow.document.close();
+            printWindow.print();
+            $("#divForPrint").empty();
         }
 
     </script>
