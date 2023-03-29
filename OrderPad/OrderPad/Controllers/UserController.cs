@@ -35,5 +35,32 @@ namespace OrderPad.Controllers
             
             return View();
         }
+        //public IActionResult PrintCommands(string userDefaultPrinter, string printerName) {
+
+        //    ClientPrintJob cpj = new ClientPrintJob();
+        //    return View();
+        //}
+
+        public void printFoodBill() {
+            // … prior plumbing code removed for brevity
+            // this code assumed you've already created a receipt print job (printJob)
+            // and also that you've already checked the PosPrinter Capabilities to
+            // verify that the printer supports Bold and DoubleHighDoubleWide print modes
+
+            const string ESC = "\u001B";
+            const string GS = "\u001D";
+            const string InitializePrinter = ESC + "@";
+            const string BoldOn = ESC + "E" + "\u0001";
+            const string BoldOff = ESC + "E" + "\0";
+            const string DoubleOn = GS + "!" + "\u0011";  // 2x sized text (double-high + double-wide)
+            const string DoubleOff = GS + "!" + "\0";
+
+            //printJob.Print(InitializePrinter);
+            //printJob.PrintLine("Here is some normal text.");
+            //printJob.PrintLine(BoldOn + "Here is some bold text." + BoldOff);
+            //printJob.PrintLine(DoubleOn + "Here is some large text." + DoubleOff);
+
+            //printJob.ExecuteAsync();
+        }
     }
 }

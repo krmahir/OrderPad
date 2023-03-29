@@ -15,6 +15,9 @@
           }
         }
       },
+      "JSPrintManager.js/5.0.3": {
+        "type": "package"
+      },
       "MessagePack/2.1.152": {
         "type": "package",
         "dependencies": {
@@ -3582,6 +3585,20 @@
         "lib/netstandard2.0/Humanizer.dll",
         "lib/netstandard2.0/Humanizer.xml",
         "logo.png"
+      ]
+    },
+    "JSPrintManager.js/5.0.3": {
+      "sha512": "X/32OL3Uy5cjtfx54DDyp33ptc4CzIF4YTZu1jsxpsB7mJQzhPKGMqGvhAM8aX1C5BoJz4Pu3OaFM8lzh54CGg==",
+      "type": "package",
+      "path": "jsprintmanager.js/5.0.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "content/Scripts/JSPrintManager.d.ts",
+        "content/Scripts/JSPrintManager.js",
+        "jsprintmanager.js.5.0.3.nupkg.sha512",
+        "jsprintmanager.js.nuspec"
       ]
     },
     "MessagePack/2.1.152": {
@@ -10086,6 +10103,7 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
+      "JSPrintManager.js >= 5.0.3",
       "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation >= 6.0.5",
       "Microsoft.EntityFrameworkCore >= 6.0.9",
       "Microsoft.EntityFrameworkCore.SqlServer >= 6.0.9",
@@ -10139,6 +10157,10 @@
       "net6.0": {
         "targetAlias": "net6.0",
         "dependencies": {
+          "JSPrintManager.js": {
+            "target": "Package",
+            "version": "[5.0.3, )"
+          },
           "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation": {
             "target": "Package",
             "version": "[6.0.5, )"

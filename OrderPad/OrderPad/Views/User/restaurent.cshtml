@@ -1,209 +1,326 @@
 ﻿@{
-    ViewData["Title"] = "Restaurent";
-    var User = ViewData["User"] as UserDetails;
+	ViewData["Title"] = "Restaurent";
+	var User = ViewData["User"] as UserDetails;
 }
 @inject IJsonHelper Json;
 <div style="border:5px solid black">
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container-fluid" >
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">@User.BusinessName</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Order</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="">Delivery</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Menu</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+	<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+		<div class="container-fluid" >
+			<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">@User.BusinessName</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+					aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+				<ul class="navbar-nav flex-grow-1">
+					<li class="nav-item">
+						<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Order</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="">Delivery</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Menu</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
 </div>
 <div class="container-fluid" style="border:5px solid green">
-    <div class="row" style="border:5px solid blue">
-        <div class="col-2" style="border:5px solid red">
-            <ul id="divCatagory" class="nav flex-column">
-                
-            </ul>
-        </div>
-        <div id="divItemLists"class="col-6"style="border:5px solid violet">
-        </div>
-        <div id="divCartLists" class="col-auto" style="border:5px solid violet">
-        </div>
-        <div id="divForPrint"></div>
-    </div>
+	<div class="row" style="border:5px solid blue">
+		<div class="col-2" style="border:5px solid red">
+			<ul id="divCatagory" class="nav flex-column">
+				
+			</ul>
+		</div>
+		<div id="divItemLists"class="col-6"style="border:5px solid violet">
+		</div>
+		<div id="divCartLists" class="col-auto" style="border:5px solid violet">
+		</div>
+		<div id="divForPrint"></div>
+	</div>
 </div>
 
 @section Scripts{
-    <script src="print.js"></script>
-    <script type="text/javascript" language="javascript">
-        var item = @Html.Raw(Json.Serialize(ViewBag.item));
-        var itemGroup = @Html.Raw(Json.Serialize(ViewBag.itemGroup))
-        var keys = Object.keys(itemGroup);
-        var itemInBag = {};
-        
-        //
-        window.onload = function () {
-            var html;
-            keys.forEach((catagory) => {
-                html += '<button class="nav-item" value="' + catagory.toString() + '"onclick="populateItem(this.value)">' + catagory + '</button>'
-            });
-            $("#divCatagory").append(html);
-        };
 
-        function populateItem(catagory){
-            $("#divItemLists").empty();
-            var items = itemGroup[catagory];
-            console.log(items);
-            var html;
-            items.forEach((item)=>{
-                html += '<div class="card"><div class="card-info"><h3>'+item.name+'</h3><p>'+item.description+'</p><p>Price: £'+item.price+'</p><button value="'+item.id+'" onclick="AddingToList(this.value)">Add to Cart</button></div></div>';
-            
-            });
-            $("#divItemLists").append(html);
-        }
+	<script src="JSPrintManager.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.3.5/bluebird.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+	<script type="text/javascript" language="javascript">
+		var item = @Html.Raw(Json.Serialize(ViewBag.item));
+		var itemGroup = @Html.Raw(Json.Serialize(ViewBag.itemGroup))
+		var keys = Object.keys(itemGroup);
+		var itemInBag = {};
+		var GBPformat = new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: 'GBP',
+		});
+		//
+		window.onload = function () {
+			var html;
+			keys.forEach((catagory) => {
+				html += '<button class="nav-item" value="' + catagory.toString() + '"onclick="populateItem(this.value)">' + catagory + '</button>'
+			});
+			$("#divCatagory").append(html);
+		};
 
-        function AddingToList(id){
-            let foodItem = item[id];
-            if (itemInBag[id] != undefined) {
-                itemInBag[id]["count"] +=1;
-            }
-            else{
-                let tempItem = {
-                    "name":foodItem.name,
-                    "count":1,
-                    "price":foodItem.price
-                }
-                itemInBag[id] = tempItem;
-            }
-            populatingCart();
-        }
+		function populateItem(catagory){
+			$("#divItemLists").empty();
+			var items = itemGroup[catagory];
+			console.log(items);
+			var html;
+			items.forEach((item)=>{
+				html += '<div class="card"><div class="card-info"><h3>' + item.name + '</h3><p>' + item.description + '</p><p>Price: ' + GBPformat.format(item.price) + '</p><button value="' + item.id + '" onclick="AddingToList(this.value)">Add to Cart</button></div></div>';
+			
+			});
+			$("#divItemLists").append(html);
+		}
 
-        function populatingCart(){
-            $("#divCartLists").empty();
-            var html = '<h4>Restaurant Order List</h4>'+
-                '<table id="order-table" cellspacing="0" rules="all" border="1"><thead>' +
-                '<tr>'+
-                '<th>Qty</th>'+
-                '<th>Item</th>'+
-                '<th>Price</th>'+
-                '<th></th>'+
-                '</tr>'+
-                '</thead><tbody>';
-            var total = 0;
-            for (const [key, value] of Object.entries(itemInBag)) {
-                let item = value;
-                let price = item["price"] * item["count"];
-                html += '<tr><td>' + item["count"] + ' X </td><td>' + item["name"] + '</td><td>' + Math.round(price * 100) / 100 + '</td><td><button value="' + key + '" onclick="AddingToList(this.value)">+</button> <button value="' + key + '" onclick="RemoveFromList(this.value)">X</button></td></tr>';
-                total += price;
-            }
-            html += '</tbody></table>';
-            html += '<p>------------------------</p><h4>Total: ' + Math.round(total * 100) / 100 + '</h4>'
-            html += '<button onclick="printOrderList()">Print</button>';
-            $("#divCartLists").append(html);
-        }
+		function AddingToList(id){
+			let foodItem = item[id];
+			if (itemInBag[id] != undefined) {
+				itemInBag[id]["count"] +=1;
+			}
+			else{
+				let tempItem = {
+					"name":foodItem.name,
+					"count":1,
+					"price":foodItem.price
+				}
+				itemInBag[id] = tempItem;
+			}
+			populatingCart();
+		}
 
-        function RemoveFromList(id){
-            console.log(id);
-            if (itemInBag[id]!=undefined){
-                if (itemInBag[id]["count"]>1){
-                    itemInBag[id]["count"] -= 1;
-                }
-                else{
-                    delete(itemInBag[id]);
-                }
-            }
-            populatingCart();
-        }
+		function populatingCart(){
+			$("#divCartLists").empty();
+			var html = '<h4>Restaurant Order List</h4>'+
+				'<table id="order-table" cellspacing="0" rules="all" border="1"><thead>' +
+				'<tr>'+
+				'<th>Qty</th>'+
+				'<th>Item</th>'+
+				'<th>Price</th>'+
+				'<th></th>'+
+				'</tr>'+
+				'</thead><tbody>';
+			var total = 0;
+			for (const [key, value] of Object.entries(itemInBag)) {
+				let item = value;
+				let price = item["price"] * item["count"];
+				html += '<tr><td>' + item["count"] + ' X </td><td>' + item["name"] + '</td><td>' + Math.round(price * 100) / 100 + '</td><td><button value="' + key + '" onclick="AddingToList(this.value)">+</button> <button value="' + key + '" onclick="RemoveFromList(this.value)">X</button></td></tr>';
+				total += price;
+			}
+			html += '</tbody></table>';
+			html += '<p>------------------------</p><h4>Total: ' + Math.round(total * 100) / 100 + '</h4>'
+			html += '<button onclick="printOrderList()">Print</button>';
+			$("#divCartLists").append(html);
+		}
 
-        function printAnything(){
-            //var text = itemInBag;
-            //var file = new Blob([text], { type: 'text/plain' });
-            //var reader = new FileReader();
-            //reader.onload = function (e) {
-            //    var contents = e.target.result;
-            //    window.print(contents);
-            //}
-            //reader.readAsText(file);
-            var file = new Blob([itemInBag], { type: 'text/plain' });
-            console.log(file)
-            window.print(file);
-            //// clone the table to preserve the original
-            //var clonedTable = table.cloneNode(true);
+		function RemoveFromList(id){
+			console.log(id);
+			if (itemInBag[id]!=undefined){
+				if (itemInBag[id]["count"]>1){
+					itemInBag[id]["count"] -= 1;
+				}
+				else{
+					delete(itemInBag[id]);
+				}
+			}
+			populatingCart();
+		}
 
-            //// create a new document to hold the cloned table
-            //var newDoc = document.implementation.createHTMLDocument();
-            //newDoc.body.appendChild(clonedTable);
+		function printAnything(){
+			//var text = itemInBag;
+			//var file = new Blob([text], { type: 'text/plain' });
+			//var reader = new FileReader();
+			//reader.onload = function (e) {
+			//    var contents = e.target.result;
+			//    window.print(contents);
+			//}
+			//reader.readAsText(file);
+			var file = new Blob([itemInBag], { type: 'text/plain' });
+			console.log(file)
+			window.print(file);
+			//// clone the table to preserve the original
+			//var clonedTable = table.cloneNode(true);
 
-            //// print the cloned table
-            //newDoc.defaultView.print();
-        }
-        function printOrderList() {
-            $("#divForPrint").empty();
-            var html = '<h4>Monpura Limited</h4>' +
-                '<table id="order-table" cellspacing="0" rules="all" border="1"><thead>' +
-                '<tr>' +
-                '<th>Qty</th>' +
-                '<th>Item</th>' +
-                '<th>Price</th>' + +
-                '</thead><tbody>';
-            var total = 0;
-            for (const [key, value] of Object.entries(itemInBag)) {
-                let item = value;
-                let price = item["price"] * item["count"];
-                html += '<tr><td>' + item["count"] + ' X </td><td>' + item["name"] + '</td><td>' + Math.round(price * 100) / 100 + '</td></tr>';
-                total += price;
-            }
-            html += '</tbody></table>';
-            html += '<h4>Total   :   ' + Math.round(total * 100) / 100 + '</h4>'
+			//// create a new document to hold the cloned table
+			//var newDoc = document.implementation.createHTMLDocument();
+			//newDoc.body.appendChild(clonedTable);
 
-            $("#divForPrint").append(html);
-            PrintTable();
-            //if (table) {
-            //    var clonedTable = table.cloneNode(true);
-            //    var newDoc = document.implementation.createHTMLDocument();
-            //    newDoc.body.appendChild(clonedTable);
-            //    newDoc.defaultView.print();
-            //} else {
-            //    console.error("Error: Could not find table element");
-            //}
-            //var file = new Blob([table], { type: 'text/plain' });
-            //console.log(file)
-            //newDoc.defaultView.print();
-            //window.print("mahir");
-        }
+			//// print the cloned table
+			//newDoc.defaultView.print();
+		}
+		function printOrderList() {
+			$("#divForPrint").empty();
+			var html = '<h4>Monpura Limited</h4>' +
+				'<table id="order-table" cellspacing="0" rules="all" border="1"><thead>' +
+				'<tr>' +
+				'<th>Qty</th>' +
+				'<th>Item</th>' +
+				'<th>Price</th>' + +
+				'</thead><tbody>';
+			var total = 0;
+			for (const [key, value] of Object.entries(itemInBag)) {
+				let item = value;;
+				html += '<tr><td>' + item["count"] + ' X </td><td>' + item["name"] + '</td><td><p>' + GBPformat.format(item["price"] * item["count"]) + '</p></td></tr>';
+				total += price;
+			}
+			html += '</tbody></table>';
+			html += '<h4>Total   :   ' + GBPformat.format(total) + '</h4>'
 
-        function PrintTable() {
-            var printWindow = window.open('', '', 'height=200,width=400');
-            printWindow.document.write('<html><head><title>Monpura Limited</title>');
+			$("#divForPrint").append(html);
+			PrintTable();
+			//if (table) {
+			//    var clonedTable = table.cloneNode(true);
+			//    var newDoc = document.implementation.createHTMLDocument();
+			//    newDoc.body.appendChild(clonedTable);
+			//    newDoc.defaultView.print();
+			//} else {
+			//    console.error("Error: Could not find table element");
+			//}
+			//var file = new Blob([table], { type: 'text/plain' });
+			//console.log(file)
+			//newDoc.defaultView.print();
+			//window.print("mahir");
+		}
 
-            //Print the Table CSS.
-            var table_style = document.getElementById("table_style").innerHTML;
-            printWindow.document.write('<style type = "text/css">');
-            printWindow.document.write(table_style);
-            printWindow.document.write('</style>');
-            printWindow.document.write('</head>');
+		function PrintTable() {
+			var printWindow = window.open('', '', 'height=200,width=400');
+			printWindow.document.write('<html><head><title>Monpura Limited</title>');
 
-            //Print the DIV contents i.e. the HTML Table.
-            printWindow.document.write('<body>');
-            var divContents = document.getElementById("divForPrint").innerHTML;
-            printWindow.document.write(divContents);
-            printWindow.document.write('</body>');
+			//Print the Table CSS.
+			var table_style = document.getElementById("table_style").innerHTML;
+			printWindow.document.write('<style type = "text/css">');
+			printWindow.document.write(table_style);
+			printWindow.document.write('</style>');
+			printWindow.document.write('</head>');
 
-            printWindow.document.write('</html>');
-            printWindow.document.close();
-            printWindow.print();
-            $("#divForPrint").empty();
-        }
+			//Print the DIV contents i.e. the HTML Table.
+			printWindow.document.write('<body>');
+			var divContents = document.getElementById("divForPrint").innerHTML;
+			printWindow.document.write(divContents);
+			printWindow.document.write('</body>');
 
-    </script>
+			printWindow.document.write('</html>');
+			printWindow.document.close();
+			printWindow.print();
+			$("#divForPrint").empty();
+		}
+
+		function printWithEscPosCode(){
+		
+			
+
+		}
+		JSPM.JSPrintManager.auto_reconnect = true;
+		JSPM.JSPrintManager.start();
+		JSPM.JSPrintManager.WS.onStatusChanged = function () {
+			if (jspmWSStatus()) {
+				//get client installed printers
+				JSPM.JSPrintManager.getPrinters().then(function (myPrinters) {
+					var options = '';
+					for (var i = 0; i < myPrinters.length; i++) {
+						options += '<option>' + myPrinters[i] + '</option>';
+					}
+					$('#installedPrinterName').html(options);
+				});
+			}
+		};
+
+	//Check JSPM WebSocket status
+	function jspmWSStatus() {
+		if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Open)
+			return true;
+		else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Closed) {
+			alert('JSPrintManager (JSPM) is not installed or not running! Download JSPM Client App from https://neodynamic.com/downloads/jspm');
+			return false;
+		}
+		else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Blocked) {
+			alert('JSPM has blocked this website!');
+			return false;
+		}
+	}
+
+	//Do printing...
+	function print(o) {
+		if (jspmWSStatus()) {
+			//Create a ClientPrintJob
+			var cpj = new JSPM.ClientPrintJob();
+			//Set Printer type (Refer to the help, there many of them!)
+			if ($('#useDefaultPrinter').prop('checked')) {
+				cpj.clientPrinter = new JSPM.DefaultPrinter();
+			} else {
+				cpj.clientPrinter = new JSPM.InstalledPrinter($('#installedPrinterName').val());
+			}
+			//Set content to print...
+			//Create ESP/POS commands for sample label
+			var esc = '\x1B'; //ESC byte in hex notation
+			var newLine = '\x0A'; //LF byte in hex notation
+		
+			var cmds = esc + ""; //Initializes the printer (ESC )
+			cmds += esc + '!' + '\x38'; //Emphasized + Double-height + Double-width mode selected (ESC ! (8 + 16 + 32)) 56 dec => 38 hex
+			cmds += 'BEST DEAL STORES'; //text to print
+			cmds += newLine + newLine;
+			cmds += esc + '!' + '\x00'; //Character font A selected (ESC ! 0)
+			cmds += 'COOKIES                   5.00'; 
+			cmds += newLine;
+			cmds += 'MILK 65 Fl oz             3.78';
+			cmds += newLine + newLine;
+			cmds += 'SUBTOTAL                  8.78';
+			cmds += newLine;
+			cmds += 'TAX 5%                    0.44';
+			cmds += newLine;
+			cmds += 'TOTAL                     9.22';
+			cmds += newLine;
+			cmds += 'CASH TEND                10.00';
+			cmds += newLine;
+			cmds += 'CASH DUE                  0.78';
+			cmds += newLine + newLine;
+			cmds += esc + '!' + '\x18'; //Emphasized + Double-height mode selected (ESC ! (16 + 8)) 24 dec => 18 hex
+			cmds += '# ITEMS SOLD 2';
+			cmds += esc + '!' + '\x00'; //Character font A selected (ESC ! 0)
+			cmds += newLine + newLine;
+			cmds += '11/03/13  19:53:17';
+
+			cpj.printerCommands = cmds;
+			//Send print job to printer!
+			cpj.sendToClient();
+		}
+	}
+			//const escpos = require('escpos');
+
+			//// Sample data
+			//const headers = ['Name', 'Age', 'Gender'];
+			//const data = [
+			//    ['John Doe', '30', 'Male'],
+			//    ['Jane Doe', '25', 'Female'],
+			//    ['Bob Smith', '40', 'Male']
+			//];
+
+			//// Connect to the printer
+			//const device = new escpos.USB();
+			//const printer = new escpos.Printer(device);
+
+			//device.open((error) => {
+			//    if (error) {
+			//        console.error(error);
+			//        return;
+			//    }
+
+			//    // Print the table
+			//    printer
+			//        .encoding('GB18030')
+			//        .table(headers, data, {})
+			//        .feed()
+			//        .cut()
+			//        .close();
+
+			//    console.log('Printed successfully');
+			//});
+		//}
+
+	</script>
 }
-    
+	
