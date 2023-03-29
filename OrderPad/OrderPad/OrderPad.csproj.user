@@ -12,6 +12,6 @@
     <WebStackScaffolding_LayoutPageFile />
     <WebStackScaffolding_DbContextTypeFullName>OrderPad.Data.ApplicationDbContext</WebStackScaffolding_DbContextTypeFullName>
     <WebStackScaffolding_ControllerDialogWidth>650.4</WebStackScaffolding_ControllerDialogWidth>
-    <NameOfLastUsedPublishProfile>C:\Users\krmah\OneDrive - University of Huddersfield\Desktop\Git\OrderPad\OrderPad\Properties\PublishProfiles\NewOrderPad - Web Deploy.pubxml</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>C:\Users\krmah\OneDrive - University of Huddersfield\Desktop\Git\OrderPad\OrderPad\Properties\PublishProfiles\OrderPad13 - Web Deploy.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>

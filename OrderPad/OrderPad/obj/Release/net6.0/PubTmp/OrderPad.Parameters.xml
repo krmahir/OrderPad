@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <parameters>
-  <parameter name="IIS Web Application Name" description="" value="NewOrderPad" tags="IisApp">
+  <parameter name="IIS Web Application Name" description="" value="OrderPad13" tags="IisApp">
     <parameterEntry kind="ProviderPath" scope="IisApp" match="^C:\\Users\\krmah\\OneDrive\ -\ University\ of\ Huddersfield\\Desktop\\Git\\OrderPad\\OrderPad\\obj\\Release\\net6\.0\\PubTmp\\Out\\$" />
   </parameter>
 </parameters>
