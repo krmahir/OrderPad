@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="IIS Web Application Name" description="" value="OrderPad13" tags="IisApp">
+    <parameterEntry kind="ProviderPath" scope="IisApp" match="^C:\\Users\\krmah\\OneDrive\ -\ University\ of\ Huddersfield\\Desktop\\Git\\OrderPad\\OrderPad\\obj\\Release\\net6\.0\\win-x86\\PubTmp\\Out\\$" />
+  </parameter>
+  <parameter name="OrderPad.Data.ApplicationDbContext" description="" value="Data Source=tcp:orderpad.database.windows.net,1433;Initial Catalog=OrderPad_db;User Id=mahir@orderpad;Password=siamahir420" tags="dbfullsql">
+    <parameterEntry kind="ProviderPath" scope="dbfullsql" match="^C:\\Users\\krmah\\OneDrive\ -\ University\ of\ Huddersfield\\Desktop\\Git\\OrderPad\\OrderPad\\obj\\Release\\net6\.0\\win-x86\\PubTmp\\EFSQLScripts\\OrderPad\.Data\.ApplicationDbContext\.sql$" />
+  </parameter>
+</parameters>

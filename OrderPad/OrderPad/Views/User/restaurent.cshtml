@@ -56,7 +56,6 @@
 			style: 'currency',
 			currency: 'GBP',
 		});
-		//
 		window.onload = function () {
 			var html;
 			keys.forEach((catagory) => {
@@ -113,7 +112,7 @@
 			}
 			html += '</tbody></table>';
 			html += '<p>------------------------</p><h4>Total: ' + Math.round(total * 100) / 100 + '</h4>'
-			html += '<button onclick="printOrderList()">Print</button>';
+			html += '<button onclick="printOrderList(itemInBag)">Print</button>';
 			$("#divCartLists").append(html);
 		}
 
@@ -152,174 +151,163 @@
 			//// print the cloned table
 			//newDoc.defaultView.print();
 		}
-		function printOrderList() {
-			$("#divForPrint").empty();
-			var html = '<h4>Monpura Limited</h4>' +
-				'<table id="order-table" cellspacing="0" rules="all" border="1"><thead>' +
-				'<tr>' +
-				'<th>Qty</th>' +
-				'<th>Item</th>' +
-				'<th>Price</th>' + +
-				'</thead><tbody>';
-			var total = 0;
-			for (const [key, value] of Object.entries(itemInBag)) {
-				let item = value;;
-				html += '<tr><td>' + item["count"] + ' X </td><td>' + item["name"] + '</td><td><p>' + GBPformat.format(item["price"] * item["count"]) + '</p></td></tr>';
-				total += price;
+
+
+		async function connectPrinter() {
+			const filters = [{ vendorId: 0x0416, productId: 0x5011 }]; // Example vendor ID and product ID for the printer
+			const usbDevice = await navigator.usb.requestDevice({ filters });
+			await usbDevice.open();
+			await usbDevice.selectConfiguration(1);
+			await usbDevice.claimInterface(0);
+			console.log("Printer connected");
+			return usbDevice;
+		}
+
+		// Print the order list
+		async function printOrderList(orderItems) {
+			const printer = await connectPrinter();
+
+			// Initialize the printer
+			const initCommands = new Uint8Array([0x1b, 0x40]);
+			await printer.transferOut(0, initCommands);
+
+			// Set the font size and style
+			const fontCommands = new Uint8Array([0x1d, 0x21, 0x11]); // 2x height, 2x width, bold
+			await printer.transferOut(0, fontCommands);
+
+			// Print the order items
+			for (const item of orderItems) {
+				const itemLine = `${item.name} ${item.price}`;
+				const itemCommands = new Uint8Array([0x0a, ...itemLine.split("").map(c => c.charCodeAt(0)), 0x0a]); // Add line feed before and after each item
+				await printer.transferOut(0, itemCommands);
 			}
-			html += '</tbody></table>';
-			html += '<h4>Total   :   ' + GBPformat.format(total) + '</h4>'
 
-			$("#divForPrint").append(html);
-			PrintTable();
-			//if (table) {
-			//    var clonedTable = table.cloneNode(true);
-			//    var newDoc = document.implementation.createHTMLDocument();
-			//    newDoc.body.appendChild(clonedTable);
-			//    newDoc.defaultView.print();
-			//} else {
-			//    console.error("Error: Could not find table element");
-			//}
-			//var file = new Blob([table], { type: 'text/plain' });
-			//console.log(file)
-			//newDoc.defaultView.print();
-			//window.print("mahir");
+			// Cut the paper
+			const cutCommands = new Uint8Array([0x1d, 0x56, 0x42, 0x00]);
+			await printer.transferOut(0, cutCommands);
+
+			console.log("Order list printed");
 		}
 
-		function PrintTable() {
-			var printWindow = window.open('', '', 'height=200,width=400');
-			printWindow.document.write('<html><head><title>Monpura Limited</title>');
 
-			//Print the Table CSS.
-			var table_style = document.getElementById("table_style").innerHTML;
-			printWindow.document.write('<style type = "text/css">');
-			printWindow.document.write(table_style);
-			printWindow.document.write('</style>');
-			printWindow.document.write('</head>');
 
-			//Print the DIV contents i.e. the HTML Table.
-			printWindow.document.write('<body>');
-			var divContents = document.getElementById("divForPrint").innerHTML;
-			printWindow.document.write(divContents);
-			printWindow.document.write('</body>');
 
-			printWindow.document.write('</html>');
-			printWindow.document.close();
-			printWindow.print();
-			$("#divForPrint").empty();
-		}
+		//function printOrderList() {
+		//	$("#divForPrint").empty();
+		//	var html = '<h4>Monpura Limited</h4>' +
+		//		'<table id="order-table" cellspacing="0" rules="all" border="1"><thead>' +
+		//		'<tr>' +
+		//		'<th>Qty</th>' +
+		//		'<th>Item</th>' +
+		//		'<th>Price</th>' + +
+		//		'</thead><tbody>';
+		//	var total = 0;
+		//	for (const [key, value] of Object.entries(itemInBag)) {
+		//		let item = value;;
+		//		html += '<tr><td>' + item["count"] + ' X </td><td>' + item["name"] + '</td><td><p>' + GBPformat.format(item["price"] * item["count"]) + '</p></td></tr>';
+		//		total += item["price"] * item["count"];
+		//	}
+		//	html += '</tbody></table>';
+		//	html += '<h4>Total   :   ' + GBPformat.format(total) + '</h4>'
 
-		function printWithEscPosCode(){
-		
-			
-
-		}
-		JSPM.JSPrintManager.auto_reconnect = true;
-		JSPM.JSPrintManager.start();
-		JSPM.JSPrintManager.WS.onStatusChanged = function () {
-			if (jspmWSStatus()) {
-				//get client installed printers
-				JSPM.JSPrintManager.getPrinters().then(function (myPrinters) {
-					var options = '';
-					for (var i = 0; i < myPrinters.length; i++) {
-						options += '<option>' + myPrinters[i] + '</option>';
-					}
-					$('#installedPrinterName').html(options);
-				});
-			}
-		};
-
-	//Check JSPM WebSocket status
-	function jspmWSStatus() {
-		if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Open)
-			return true;
-		else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Closed) {
-			alert('JSPrintManager (JSPM) is not installed or not running! Download JSPM Client App from https://neodynamic.com/downloads/jspm');
-			return false;
-		}
-		else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Blocked) {
-			alert('JSPM has blocked this website!');
-			return false;
-		}
-	}
-
-	//Do printing...
-	function print(o) {
-		if (jspmWSStatus()) {
-			//Create a ClientPrintJob
-			var cpj = new JSPM.ClientPrintJob();
-			//Set Printer type (Refer to the help, there many of them!)
-			if ($('#useDefaultPrinter').prop('checked')) {
-				cpj.clientPrinter = new JSPM.DefaultPrinter();
-			} else {
-				cpj.clientPrinter = new JSPM.InstalledPrinter($('#installedPrinterName').val());
-			}
-			//Set content to print...
-			//Create ESP/POS commands for sample label
-			var esc = '\x1B'; //ESC byte in hex notation
-			var newLine = '\x0A'; //LF byte in hex notation
-		
-			var cmds = esc + ""; //Initializes the printer (ESC )
-			cmds += esc + '!' + '\x38'; //Emphasized + Double-height + Double-width mode selected (ESC ! (8 + 16 + 32)) 56 dec => 38 hex
-			cmds += 'BEST DEAL STORES'; //text to print
-			cmds += newLine + newLine;
-			cmds += esc + '!' + '\x00'; //Character font A selected (ESC ! 0)
-			cmds += 'COOKIES                   5.00'; 
-			cmds += newLine;
-			cmds += 'MILK 65 Fl oz             3.78';
-			cmds += newLine + newLine;
-			cmds += 'SUBTOTAL                  8.78';
-			cmds += newLine;
-			cmds += 'TAX 5%                    0.44';
-			cmds += newLine;
-			cmds += 'TOTAL                     9.22';
-			cmds += newLine;
-			cmds += 'CASH TEND                10.00';
-			cmds += newLine;
-			cmds += 'CASH DUE                  0.78';
-			cmds += newLine + newLine;
-			cmds += esc + '!' + '\x18'; //Emphasized + Double-height mode selected (ESC ! (16 + 8)) 24 dec => 18 hex
-			cmds += '# ITEMS SOLD 2';
-			cmds += esc + '!' + '\x00'; //Character font A selected (ESC ! 0)
-			cmds += newLine + newLine;
-			cmds += '11/03/13  19:53:17';
-
-			cpj.printerCommands = cmds;
-			//Send print job to printer!
-			cpj.sendToClient();
-		}
-	}
-			//const escpos = require('escpos');
-
-			//// Sample data
-			//const headers = ['Name', 'Age', 'Gender'];
-			//const data = [
-			//    ['John Doe', '30', 'Male'],
-			//    ['Jane Doe', '25', 'Female'],
-			//    ['Bob Smith', '40', 'Male']
-			//];
-
-			//// Connect to the printer
-			//const device = new escpos.USB();
-			//const printer = new escpos.Printer(device);
-
-			//device.open((error) => {
-			//    if (error) {
-			//        console.error(error);
-			//        return;
-			//    }
-
-			//    // Print the table
-			//    printer
-			//        .encoding('GB18030')
-			//        .table(headers, data, {})
-			//        .feed()
-			//        .cut()
-			//        .close();
-
-			//    console.log('Printed successfully');
-			//});
+		//	$("#divForPrint").append(html);
+		//	PrintTable();
+		//	//if (table) {
+		//	//    var clonedTable = table.cloneNode(true);
+		//	//    var newDoc = document.implementation.createHTMLDocument();
+		//	//    newDoc.body.appendChild(clonedTable);
+		//	//    newDoc.defaultView.print();
+		//	//} else {
+		//	//    console.error("Error: Could not find table element");
+		//	//}
+		//	//var file = new Blob([table], { type: 'text/plain' });
+		//	//console.log(file)
+		//	//newDoc.defaultView.print();
+		//	//window.print("mahir");
 		//}
+
+		//JSPM.JSPrintManager.auto_reconnect = true;
+		//JSPM.JSPrintManager.start();
+		//JSPM.JSPrintManager.WS.onStatusChanged = function () {
+		//	if (jspmWSStatus()) {
+		//		//get client installed printers
+		//		JSPM.JSPrintManager.getPrinters().then(function (myPrinters) {
+		//			var options = '';
+		//			for (var i = 0; i < myPrinters.length; i++) {
+		//				options += '<option>' + myPrinters[i] + '</option>';
+		//			}
+		//			$('#installedPrinterName').html(options);
+		//		});
+		//	}
+		//};
+
+		////Check JSPM WebSocket status
+		//function jspmWSStatus() {
+		//	if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Open)
+		//		return true;
+		//	else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Closed) {
+		//		alert('JSPrintManager (JSPM) is not installed or not running! Download JSPM Client App from https://neodynamic.com/downloads/jspm');
+		//		return false;
+		//	}
+		//	else if (JSPM.JSPrintManager.websocket_status == JSPM.WSStatus.Blocked) {
+		//		alert('JSPM has blocked this website!');
+		//		return false;
+		//	}
+		//}
+
+		////Do printing...
+		//function PrintTable() {
+		//	if (jspmWSStatus()) {
+		//		//Create a ClientPrintJob
+		//		var cpj = new JSPM.ClientPrintJob();
+		//		//Set Printer type (Refer to the help, there many of them!)
+		//		if ($('#useDefaultPrinter').prop('checked')) {
+		//			cpj.clientPrinter = new JSPM.DefaultPrinter();
+		//		} else {
+		//			cpj.clientPrinter = new JSPM.InstalledPrinter($('#XP-80C').val());
+		//		}
+		//		//Set content to print...
+		//		//Create ESP/POS commands for sample label
+		//		var esc = '\x1B'; //ESC byte in hex notation
+		//		var newLine = '\x0A'; //LF byte in hex notation
+
+		//		var cmds = esc + ""; //Initializes the printer (ESC )
+		//		cmds += esc + '!' + '\x38'; //Emphasized + Double-height + Double-width mode selected (ESC ! (8 + 16 + 32)) 56 dec => 38 hex
+		//		cmds += 'BEST DEAL STORES'; //text to print
+		//		cmds += newLine + newLine;
+		//		cmds += esc + '!' + '\x00'; //Character font A selected (ESC ! 0)
+		//		cmds += 'COOKIES                   5.00';
+		//		cmds += newLine;
+		//		cmds += 'MILK 65 Fl oz             3.78';
+		//		cmds += newLine + newLine;
+		//		cmds += 'SUBTOTAL                  8.78';
+		//		cmds += newLine;
+		//		cmds += 'TAX 5%                    0.44';
+		//		cmds += newLine;
+		//		cmds += 'TOTAL                     9.22';
+		//		cmds += newLine;
+		//		cmds += 'CASH TEND                10.00';
+		//		cmds += newLine;
+		//		cmds += 'CASH DUE                  0.78';
+		//		cmds += newLine + newLine;
+		//		cmds += esc + '!' + '\x18'; //Emphasized + Double-height mode selected (ESC ! (16 + 8)) 24 dec => 18 hex
+		//		cmds += '# ITEMS SOLD 2';
+		//		cmds += esc + '!' + '\x00'; //Character font A selected (ESC ! 0)
+		//		cmds += newLine + newLine;
+		//		cmds += '11/03/13  19:53:17';
+
+		//		cpj.printerCommands = cmds;
+		//		//Send print job to printer!
+		//		cpj.sendToClient();
+		//	}
+		//}
+
+
+		
+		
+
+
+		
 
 	</script>
 }

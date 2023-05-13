@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<sitemanifest>
+  <IisApp path="C:\Users\krmah\OneDrive - University of Huddersfield\Desktop\Git\OrderPad\OrderPad\obj\Release\net6.0\win-x86\PubTmp\Out\" />
+  <dbfullsql path="C:\Users\krmah\OneDrive - University of Huddersfield\Desktop\Git\OrderPad\OrderPad\obj\Release\net6.0\win-x86\PubTmp\EFSQLScripts\OrderPad.Data.ApplicationDbContext.sql" />
+</sitemanifest>

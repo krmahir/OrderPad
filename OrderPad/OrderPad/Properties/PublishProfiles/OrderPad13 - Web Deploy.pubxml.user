@@ -7,7 +7,17 @@ by editing this MSBuild file. In order to learn more about this please visit htt
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
     <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAC3SkSxbqfUiUXz/1HFOIEAAAAAACAAAAAAAQZgAAAAEAACAAAAAbie6GWxKFCViaA+caBWwutxDMseIsZDWteIpNzL3uEAAAAAAOgAAAAAIAACAAAAC9ie03L0WVuzqI40D1lIGw0qjEE+MzEhc+7VUmE5x7bYAAAACNVFQYrHv/Kgu5bpwOVcNgCmgCTtj51Aj7z8eRAZyGyP/NCrmxjSchKZXfSONjHav9ioIKtkqV2i5jhThAfiAnWlc5IAWrVaFTlZfGeT2IqiX/RVAkpLqBra1f22LmfV7gZzwf5BNFDARjsV7bxs/EOgV7fEA9TJXYBCYXLceLx0AAAADg6Z5PXFl/1AiH8po1p99lnb33S2GRGBmSUALEJ+6EBN33SfW93d80nFFdhX4M1fSz+a5N1lz78uwcXB4YDRHb</EncryptedPassword>
-    <History>True|2023-03-29T01:00:55.1874098Z;True|2023-03-29T01:36:57.6524012+01:00;</History>
+    <History>False|2023-03-29T01:25:49.7141857Z;True|2023-03-29T02:23:52.9195561+01:00;True|2023-03-29T02:13:31.9185826+01:00;True|2023-03-29T02:00:55.1874098+01:00;True|2023-03-29T01:36:57.6524012+01:00;</History>
     <LastFailureDetails />
   </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="MyConnectionString">
+      <Value>Data Source=tcp:orderpad.database.windows.net,1433%3bInitial Catalog=OrderPad_db%3bUser Id=mahir%40orderpad%3bPassword=siamahir420</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+  <ItemGroup>
+    <EFMigrations Include="OrderPad.Data.ApplicationDbContext">
+      <Value>Data Source=tcp:orderpad.database.windows.net,1433%3bInitial Catalog=OrderPad_db%3bUser Id=mahir%40orderpad%3bPassword=siamahir420</Value>
+    </EFMigrations>
+  </ItemGroup>
 </Project>
