@@ -27,7 +27,7 @@
 		</div>
 	</nav>
 </div>
-<div class="container-fluid" style="border:5px solid green">
+<div class="container-fluid" style="border:5px solid green">	
 	<div class="row" style="border:5px solid blue">
 		<div class="col-2" style="border:5px solid red">
 			<ul id="divCatagory" class="nav flex-column">
@@ -48,6 +48,13 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.3.5/bluebird.min.js"></script>
 	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 	<script type="text/javascript" language="javascript">
+
+		// const SerialPort = require(42.ialport/bindings');
+		const Escpos = require('escpos');
+		const fs = require('fs');
+		const printerPort = '/dev/your_printer_port'; // Replace this with your printer port (e.g., COM1 for Windows, /dev/usb/lp0 for Linux)
+
+		// Function to print using the ESC/POS printer
 		var item = @Html.Raw(Json.Serialize(ViewBag.item));
 		var itemGroup = @Html.Raw(Json.Serialize(ViewBag.itemGroup))
 		var keys = Object.keys(itemGroup);
@@ -189,9 +196,6 @@
 			console.log("Order list printed");
 		}
 
-
-
-
 		//function printOrderList() {
 		//	$("#divForPrint").empty();
 		//	var html = '<h4>Monpura Limited</h4>' +
@@ -302,12 +306,44 @@
 		//	}
 		//}
 
+		async function printWithESCPOS(): Promise<void> {
+			try {
+				// Initialize the serial port connection
+				const serialPort = new SerialPort(printerPort, { baudRate: 9600 });
 
-		
-		
+				// Create an instance of the printer
+				const device = new Escpos.Serial(serialPort);
 
+				// Initialize the printer
+				const printer = new Escpos.Printer(device);
 
-		
+				// Open the connection to the printer
+				device.open(async () => {
+					console.log('Printer connected and ready to print!');
+
+					// Start printing
+					printer
+						.font('a')
+						.align('ct')
+						.style('bu')
+						.size(2, 2)
+						.text('Hello, ESC/POS Printer!')
+						.text('Welcome to the world of ESC/POS printing!')
+						.text(' ')
+						.text('This is a test print.');
+
+					// Close the printer connection after printing
+					printer.cut();
+					await device.flush();
+					await device.close();
+
+					console.log('Printing completed.');
+				});
+			} catch (err) {
+				console.error('Error while printing:', err);
+			}
+		}
+	
 
 	</script>
 }
